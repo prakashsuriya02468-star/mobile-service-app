@@ -13,8 +13,8 @@ app.secret_key = os.getenv('SECRET_KEY', 'mobileservice@secretkey2024')
 DB_PATH = os.path.join(os.path.dirname(__file__), 'database.db')
 
 # ─── Admin Credentials ─────────────────────────────────────
-ADMIN_USERNAME = os.getenv('ADMIN_USERNAME', 'admin')
-ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'shop@1234')
+ADMIN_USERNAME = os.getenv('ADMIN_USERNAME', 'Hashim2605')
+ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'Hashim@123')
 
 # ─── Firewall Configuration ─────────────────────────────────
 RATE_LIMIT_WINDOW   = 60        # seconds
