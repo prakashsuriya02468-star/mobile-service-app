@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Track Your Repair – MobileService</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+</head>
+<body class="track-body">
+
+  <div class="track-wrapper">
+
+    <!-- Brand -->
+    <header class="track-header">
+      <div class="track-brand">
+        <span>🔧</span>
+        <span>MobileService</span>
+      </div>
+      <p class="track-tagline">Repair Status Tracker</p>
+    </header>
+
+    <!-- Search Card -->
+    <div class="track-search-card">
+      <h2>Check Your Repair Status</h2>
+      <p>Enter the Order ID given to you at the shop.</p>
+      <form method="POST" action="/track" class="track-form">
+        <div class="track-input-row">
+          <input type="text" name="order_id" placeholder="e.g. MS1001"
+                 value="{% if order %}{{ order.order_id }}{% endif %}"
+                 maxlength="10" required autocomplete="off"
+                 class="track-input" id="trackInput"/>
+          <button type="submit" class="btn-track">Track →</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Not Found -->
+    {% if not_found %}
+    <div class="track-result not-found">
+      <div class="result-icon">❌</div>
+      <h3>Order Not Found</h3>
+      <p>We couldn't find any order with that ID.<br/>
+         Please check the ID on your receipt and try again.</p>
+    </div>
+    {% endif %}
+
+    <!-- Order Found -->
+    {% if order %}
+    <div class="track-result found">
+      <div class="result-top">
+        <div class="result-order-id">
+          <span class="label">Order ID</span>
+          <span class="value">{{ order.order_id }}</span>
+        </div>
+        <div class="result-status">
+          <span class="status-badge-lg status-{{ order.status | replace(' ', '-') | lower }}">
+            {{ order.status }}
+          </span>
+        </div>
+      </div>
+
+      <div class="result-grid">
+        <div class="result-item">
+          <span class="ri-label">👤 Customer Name</span>
+          <span class="ri-value">{{ order.customer_name }}</span>
+        </div>
+        <div class="result-item">
+          <span class="ri-label">📱 Phone Model</span>
+          <span class="ri-value">{{ order.phone_model }}</span>
+        </div>
+        <div class="result-item full-width">
+          <span class="ri-label">🛠 Problem Reported</span>
+          <span class="ri-value">{{ order.problem }}</span>
+        </div>
+        <div class="result-item">
+          <span class="ri-label">📅 Order Created</span>
+          <span class="ri-value">{{ order.created_at[:16] }}</span>
+        </div>
+      </div>
+
+      <!-- Status Progress Bar -->
+      <div class="status-progress">
+        <p class="progress-label">Repair Progress</p>
+        <div class="progress-steps">
+          {% set all_steps = ['Received', 'Diagnosing', 'In Progress', 'Waiting for Parts', 'Completed', 'Ready for Pickup', 'Delivered'] %}
+          {% set active_map = {
+            'Received': 0, 'Diagnosing': 1, 'In Progress': 2,
+            'Waiting for Parts': 3, 'Completed': 4,
+            'Ready for Pickup': 5, 'Delivered': 6
+          } %}
+          {% set current_idx = active_map.get(order.status, 0) %}
+          {% for step in all_steps %}
+            <div class="progress-step {% if loop.index0 <= current_idx %}done{% endif %} {% if loop.index0 == current_idx %}active{% endif %}">
+              <div class="step-dot"></div>
+              <span class="step-label">{{ step }}</span>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
+    {% endif %}
+
+    <footer class="track-footer">
+      <p>Need help? Visit the shop or call us directly.</p>
+      <p class="footer-note">This page is for customers only.</p>
+    </footer>
+
+  </div>
+
+</body>
+</html>

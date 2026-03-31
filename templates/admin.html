@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard – MobileService</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+</head>
+<body class="admin-body">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-icon-sm">🔧</span>
+      <span>MobileService</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#create-section" class="nav-item active">➕ New Order</a>
+      <a href="#orders-section" class="nav-item">📋 All Orders</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <a href="/logout" class="btn-logout">🚪 Logout</a>
+    </div>
+  </aside>
+
+  <!-- ── Main Content ── -->
+  <main class="main-content">
+
+    <!-- Header -->
+    <header class="dash-header">
+      <div>
+        <h2>Dashboard</h2>
+        <p class="dash-sub">Manage all repair orders</p>
+      </div>
+      <div class="header-stats">
+        <div class="stat-chip">
+          <span class="stat-num">{{ orders | length }}</span>
+          <span class="stat-label">Total Orders</span>
+        </div>
+        <div class="stat-chip accent">
+          <span class="stat-num">
+            {{ orders | selectattr('status', 'equalto', 'In Progress') | list | length }}
+          </span>
+          <span class="stat-label">In Progress</span>
+        </div>
+        <div class="stat-chip green">
+          <span class="stat-num">
+            {{ orders | selectattr('status', 'equalto', 'Completed') | list | length }}
+          </span>
+          <span class="stat-label">Completed</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Alert -->
+    {% if message %}
+      <div class="alert alert-{{ message.type }}">
+        {% if message.type == 'success' %}✅{% else %}⚠{% endif %}
+        {{ message.text }}
+      </div>
+    {% endif %}
+
+    <!-- ── Create Order Form ── -->
+    <section id="create-section" class="card">
+      <div class="card-header">
+        <h3>➕ Create New Repair Order</h3>
+      </div>
+      <form method="POST" action="/admin" class="order-form">
+        <input type="hidden" name="action" value="create"/>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Customer Name *</label>
+            <input type="text" name="customer_name" placeholder="e.g. Ravi Kumar" required/>
+          </div>
+          <div class="form-group">
+            <label>Phone Model *</label>
+            <input type="text" name="phone_model" placeholder="e.g. Samsung Galaxy A54" required/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group flex-2">
+            <label>Problem Description *</label>
+            <input type="text" name="problem" placeholder="e.g. Screen cracked, not turning on" required/>
+          </div>
+          <div class="form-group">
+            <label>Initial Status</label>
+            <select name="status">
+              <option value="Received">Received</option>
+              <option value="Diagnosing">Diagnosing</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Waiting for Parts">Waiting for Parts</option>
+              <option value="Completed">Completed</option>
+              <option value="Ready for Pickup">Ready for Pickup</option>
+              <option value="Delivered">Delivered</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">Create Order</button>
+          <button type="reset" class="btn-ghost">Clear</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ── Orders Table ── -->
+    <section id="orders-section" class="card">
+      <div class="card-header">
+        <h3>📋 All Repair Orders</h3>
+        <input type="text" id="searchInput" placeholder="🔍 Search orders…" class="search-input" onkeyup="filterTable()"/>
+      </div>
+
+      {% if orders %}
+      <div class="table-wrapper">
+        <table id="ordersTable">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Phone Model</th>
+              <th>Problem</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Update</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for o in orders %}
+            <tr>
+              <td><span class="order-id-badge">{{ o.order_id }}</span></td>
+              <td>{{ o.customer_name }}</td>
+              <td>{{ o.phone_model }}</td>
+              <td class="problem-cell" title="{{ o.problem }}">{{ o.problem }}</td>
+              <td>
+                <span class="status-badge status-{{ o.status | replace(' ', '-') | lower }}">
+                  {{ o.status }}
+                </span>
+              </td>
+              <td class="date-cell">{{ o.created_at[:16] }}</td>
+              <td>
+                <form method="POST" action="/update/{{ o.id }}" class="inline-form">
+                  <select name="status" class="status-select">
+                    {% for s in ['Received','Diagnosing','In Progress','Waiting for Parts','Completed','Ready for Pickup','Delivered'] %}
+                      <option value="{{ s }}" {% if o.status == s %}selected{% endif %}>{{ s }}</option>
+                    {% endfor %}
+                  </select>
+                  <button type="submit" class="btn-update">Save</button>
+                </form>
+              </td>
+              <td>
+                <form method="POST" action="/delete/{{ o.id }}"
+                      onsubmit="return confirm('Delete order {{ o.order_id }}?')">
+                  <button type="submit" class="btn-delete">🗑</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+        <div class="empty-state">
+          <p>📭 No orders yet. Create your first repair order above!</p>
+        </div>
+      {% endif %}
+    </section>
+
+  </main>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

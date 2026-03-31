@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error {{ code }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .error-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 80vh;
+            text-align: center;
+            padding: 2rem;
+        }
+        .error-code {
+            font-size: 6rem;
+            font-weight: 800;
+            color: #e53e3e;
+            line-height: 1;
+        }
+        .error-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 0.5rem 0;
+            color: #2d3748;
+        }
+        .error-message {
+            font-size: 1rem;
+            color: #718096;
+            max-width: 400px;
+            margin: 1rem 0 2rem;
+        }
+        .back-btn {
+            background: #4299e1;
+            color: white;
+            padding: 0.6rem 1.6rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .back-btn:hover { background: #2b6cb0; }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-code">{{ code }}</div>
+        <div class="error-title">{{ title }}</div>
+        <p class="error-message">{{ message }}</p>
+        <a href="{{ url_for('login') }}" class="back-btn">← முகப்பு பக்கம்</a>
+    </div>
+</body>
+</html>
