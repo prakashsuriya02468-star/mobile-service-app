@@ -122,10 +122,13 @@ def get_db():
 def generate_order_id():
     conn = get_db()
     c = conn.cursor()
-    c.execute("SELECT COUNT(*) as cnt FROM orders")
+    c.execute("SELECT MAX(CAST(SUBSTR(order_id, 3) AS INTEGER)) as max_num FROM orders WHERE order_id LIKE 'MS%'")
     row = c.fetchone()
     conn.close()
-    number = row['cnt'] + 1
+    if row['max_num'] is None:
+        number = 1
+    else:
+        number = row['max_num'] + 1
     return f"MS{1000 + number}"
 
 # ─── Routes ─────────────────────────────────────────────────
